@@ -69,7 +69,7 @@ func main() {
 
 	if getArgsArePresent(args, []string{"--help", "?", "/?", "/help", "-h", "-help"}) {
 		fmt.Println(
-			"passgen v.1.0",
+			"passgen v.1.1",
 			"\n© 2018 Ringo Hoffmann (zekro Development)",
 			"\n\n  -l    Length in chars (defaultly 32)",
 			"\n  -n    Number of generated password strings",
