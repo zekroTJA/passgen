@@ -9,8 +9,15 @@ import (
 	"time"
 )
 
-const FULLSETSIZE = 95
-const SETSTARTINDEX = 32
+const (
+	FULLSETSIZE   = 95
+	SETSTARTINDEX = 32
+	STRENGTH_0    = `[a-z\d]`
+	STRENGTH_1    = `[a-zA-Z\d]`
+	STRENGTH_2    = `[\w\d]`
+	STRENGTH_3    = `[\w\d!"§$%&/()=?-]`
+	STRENGTH_4    = `.`
+)
 
 func createcharset() string {
 	var set = ""
@@ -46,6 +53,14 @@ func getRandChar(charset string, pattern *regexp.Regexp) string {
 	return filteredset[rnd]
 }
 
+func genPasswd(len int, charset string, pattern *regexp.Regexp) string {
+	var res = ""
+	for i := 0; i < len; i++ {
+		res += getRandChar(charset, pattern)
+	}
+	return res
+}
+
 func main() {
 
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -57,21 +72,58 @@ func main() {
 			"passgen v.1.0",
 			"\n© 2018 Ringo Hoffmann (zekro Development)",
 			"\n\n  -l    Length in chars (defaultly 32)",
+			"\n  -n    Number of generated password strings",
+			"\n        (defaultly 1)",
+			"\n  -s    Strength as number instead of regex",
+			"\n         0 - [a-z\\d]",
+			"\n         1 - [a-zA-Z\\d]",
+			"\n         2 - [\\w\\d]",
+			"\n         3 - [\\w\\d!\"§$%&/()=?-]",
+			"\n         4 - .",
 			"\n  -rx   Regex of matched chars used to form",
-			"\n        password (defaultly '.')",
+			"\n        password (defaultly '[\\w]')",
 		)
 		os.Exit(0)
 	}
 
-	var pwlen = 32
-	var regex = regexp.MustCompile(`.`)
-	var result = ""
+	var (
+		pwlen  = 32
+		number = 1
+		regex  = regexp.MustCompile(`[\w]`)
+	)
 
 	if pwlenres := getArgVal(args, "-l"); pwlenres != "" {
 		var err error
-		pwlen, err = strconv.Atoi(getArgVal(args, "-l"))
+		pwlen, err = strconv.Atoi(pwlenres)
 		if err != nil {
 			panic("Can not convert entered length value to int")
+		}
+	}
+
+	if numberraw := getArgVal(args, "-n"); numberraw != "" {
+		var err error
+		number, err = strconv.Atoi(numberraw)
+		if err != nil {
+			panic("Can not convert entered number value to int")
+		}
+	}
+
+	if strengthres := getArgVal(args, "-s"); strengthres != "" {
+		strength, err := strconv.Atoi(strengthres)
+		if err != nil {
+			panic("Can not convert entered strength value to int")
+		}
+		switch strength {
+		case 0:
+			regex = regexp.MustCompile(STRENGTH_0)
+		case 1:
+			regex = regexp.MustCompile(STRENGTH_1)
+		case 2:
+			regex = regexp.MustCompile(STRENGTH_2)
+		case 3:
+			regex = regexp.MustCompile(STRENGTH_3)
+		case 4:
+			regex = regexp.MustCompile(STRENGTH_4)
 		}
 	}
 
@@ -81,9 +133,7 @@ func main() {
 
 	fullcharset := createcharset()
 
-	for i := 0; i < pwlen; i++ {
-		result += getRandChar(fullcharset, regex)
+	for i := 0; i < number; i++ {
+		fmt.Println(genPasswd(pwlen, fullcharset, regex))
 	}
-
-	fmt.Println(result)
 }
