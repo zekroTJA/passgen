@@ -45,7 +45,7 @@ Download the installer [here](https://golang.org/dl/) or if you are using Linux 
 
 Then, build the repository with:
 ```
-go build passgen/src/github.com/zekrotja/passgen/main.go -o passgen
+go build -o passgen passgen/src/github.com/zekrotja/passgen/main.go
 ```
 
 Now, make the binary accessable in console:
