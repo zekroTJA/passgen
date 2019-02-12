@@ -30,6 +30,11 @@ type flags struct {
 	sep string
 }
 
+type tuple struct {
+	s string
+	i int
+}
+
 func initFlags() *flags {
 	f := new(flags)
 
@@ -75,15 +80,28 @@ func getFullCharset() string {
 
 func getRandString(charset string, length uint, pattern *regexp.Regexp) string {
 	filteredSet := pattern.FindAllString(charset, -1)
-	res := make([]string, length)
 	lenFilteredSet := big.NewInt(int64(len(filteredSet)))
+	c := make(chan tuple, length)
+	res := make([]string, length)
 
 	for i := 0; i < int(length); i++ {
-		rnd, err := rand.Int(rand.Reader, lenFilteredSet)
-		if err != nil {
-			panic(err)
+		go func(j int) {
+			rnd, err := rand.Int(rand.Reader, lenFilteredSet)
+			if err != nil {
+				panic(err)
+			}
+			c <- tuple{filteredSet[rnd.Int64()], j}
+		}(i)
+	}
+
+	var i uint = 1
+	for {
+		t := <-c
+		res[t.i] = t.s
+		if i == length {
+			break
 		}
-		res[i] = filteredSet[rnd.Int64()]
+		i++
 	}
 
 	return strings.Join(res, "")
