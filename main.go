@@ -91,7 +91,7 @@ func initFlags() *flags {
 func concat(s []string) string {
 	b := make([]byte, len(s))
 	for i, a := range s {
-		b[i] = []byte(a)[0]
+		b[i] = byte(a[0])
 	}
 	return string(b)
 }
