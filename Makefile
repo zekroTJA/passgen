@@ -30,13 +30,13 @@ $(BASE):
 # Getting dependencies and build binary in current dir
 $(BINARY)$(WINDOWS): $(BASE) get
 	@echo [ INFO ] building binary '$@'
-	$(GO) build -v \
+	(env GOPATH=$(GOPATH) $(GO) build -v \
 		-ldflags "-X main.ldTag=$(TAG) -X main.ldCommit=$(COMMIT) -X main.ldCompVer=$(COMPVER)" \
-		-o $(CURDIR)/$@ $(BASE)/.
+		-o $(CURDIR)/$@ $(BASE)/. )
 
 get: $(BASE)
 	@echo [ INFO ] getting dependencies...
-	@cd $(BASE) && $(GO) get -v -t
+	@cd $(BASE) && (env GOPATH=$(GOPATH) $(GO) get -v -t ./... )
 
 _install: $(BASE) $(BINARY)$(WINDOWS)
 	@echo [ INFO ] installing binaries to '$(INSTALLDIR)/$(BINARY)$(WINDOWS)'...
@@ -47,3 +47,6 @@ install: _install clean
 clean:
 	@echo [ INFO ] cleaning up...
 	@rm -r -f $(GOPATH)
+
+env:
+	(env GOPATH=$(GOPATH) $(GO) env)
