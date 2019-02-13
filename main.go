@@ -70,6 +70,14 @@ func initFlags() *flags {
 	return f
 }
 
+func concat(s []string) string {
+	b := make([]byte, len(s))
+	for i, a := range s {
+		b[i] = []byte(a)[0]
+	}
+	return string(b)
+}
+
 func getFullCharset() string {
 	set := make([]string, fullSize)
 	for i := 0; i < fullSize; i++ {
@@ -104,7 +112,7 @@ func getRandString(charset string, length uint, pattern *regexp.Regexp) string {
 		i++
 	}
 
-	return strings.Join(res, "")
+	return concat(res)
 }
 
 func generateMultipleTokens(charset string, length uint, pattern *regexp.Regexp, n uint) []string {
