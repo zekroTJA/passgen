@@ -34,9 +34,9 @@ $(BINARY)$(WINDOWS): $(BASE) get
 		-ldflags "-X main.ldTag=$(TAG) -X main.ldCommit=$(COMMIT) -X main.ldCompVer=$(COMPVER)" \
 		-o $(CURDIR)/$@ $(BASE)/.
 
-get:
+get: $(BASE)
 	@echo [ INFO ] getting dependencies...
-	$(GO) get -v -t $(BASE)/.
+	@cd $(BASE) && $(GO) get -v -t
 
 _install: $(BASE) $(BINARY)$(WINDOWS)
 	@echo [ INFO ] installing binaries to '$(INSTALLDIR)/$(BINARY)$(WINDOWS)'...
