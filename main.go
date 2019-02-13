@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"math/big"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -12,6 +13,12 @@ import (
 const (
 	fullSize   = 95
 	startIndex = 32
+)
+
+var (
+	ldTag     = "UNSET"
+	ldCommit  = "UNSET"
+	ldCompVer = "UNSET"
 )
 
 var strength = []string{
@@ -28,6 +35,7 @@ type flags struct {
 	str uint
 	rgx string
 	sep string
+	ver bool
 }
 
 type tuple struct {
@@ -48,7 +56,17 @@ func initFlags() *flags {
 	flag.UintVar(&f.str, "s", 2, "strength of the generated token\n"+strengthStr)
 	flag.StringVar(&f.rgx, "rx", "", "Regex for used characters for generating the token (matched on the whole charset string)")
 	flag.StringVar(&f.sep, "sep", "\n", "custom seperator for multiple tokens")
+	flag.BoolVar(&f.ver, "v", false, "display version information")
 	flag.Parse()
+
+	if f.ver {
+		fmt.Printf("passgen v.%s\n"+
+			"© 2019 Ringo Hoffmann (zekro Development)\n"+
+			"Commit Hash: %s\n"+
+			"Built with:  %s\n",
+			ldTag, ldCommit, strings.Replace(ldCompVer, "_", " ", -1))
+		os.Exit(0)
+	}
 
 	if f.len == 0 {
 		fmt.Println(`invalid value "0" for flag -l: value must be >= 1`)

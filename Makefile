@@ -4,9 +4,14 @@ BASE       = $(GOPATH)/src/$(PACKAGE)
 BINARY     = passgen
 INSTALLDIR = /usr/bin
 
+TAG        = $(shell git describe --tags)
+COMMIT     = $(shell git rev-parse HEAD)
+
 ifeq ($(GO),)
 	GO = go
 endif
+
+COMPVER    = $(shell go version | sed -e 's/ /_/g')
 
 ifeq ($(OS),Windows_NT)
 	WINDOWS = .exe
@@ -14,23 +19,28 @@ endif
 
 .PHONY: install clean get move
 
-$(BINARY)$(WINDOWS): $(BASE) get move clean
+_make: $(BINARY)$(WINDOWS) clean
 
+# Creating GOPATH path and copy all files from root path into it
 $(BASE):
 	@echo [ INFO ] creating temporary gopath '$@'...
 	@mkdir -p $@
 	@cp $(CURDIR)/* $@/
 
+# Getting dependencies and build binary in current dir
+$(BINARY)$(WINDOWS): $(BASE) get
+	@echo [ INFO ] building binary '$@'
+	$(GO) build -v \
+		-ldflags "-X main.ldTag=$(TAG) -X main.ldCommit=$(COMMIT) -X main.ldCompVer=$(COMPVER)" \
+		-o $(CURDIR)/$@ $(BASE)/.
+
 get:
-	@echo [ INFO ] getting packages and building binaries...
+	@echo [ INFO ] getting dependencies...
 	$(GO) get -v -t $(BASE)/.
 
-move:
-	@mv $(GOPATH)/bin/* $(CURDIR)
-
-_install: $(BASE) get
+_install: $(BASE) $(BINARY)$(WINDOWS)
 	@echo [ INFO ] installing binaries to '$(INSTALLDIR)/$(BINARY)$(WINDOWS)'...
-	@install -m 755 $(GOPATH)/bin/$(BINARY)$(WINDOWS) $(INSTALLDIR)
+	@install -m 755 $(CURDIR)/$(BINARY)$(WINDOWS) $(INSTALLDIR)
 
 install: _install clean
 
