@@ -7,8 +7,8 @@ INSTALLDIR = /usr/bin
 TAG        = $(shell git describe --tags)
 COMMIT     = $(shell git rev-parse HEAD)
 
-ifeq ($(GO),)
-	GO = go
+ifndef $(GO)
+	GO = $(shell which go1)
 endif
 
 COMPVER    = $(shell go version | sed -e 's/ /_/g')
